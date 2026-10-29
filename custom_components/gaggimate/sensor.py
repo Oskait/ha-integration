@@ -14,8 +14,9 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfMass, UnitOfPressure, UnitOfTemperature
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityCategory
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity import Entity, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -36,6 +37,7 @@ from .const import (
     UNIQUE_ID_SHOT_VOLUME_PROGRESS,
     UNIQUE_ID_PROCESS_PHASE,
     UNIQUE_ID_STATUS,
+    UNIQUE_ID_STEAM_TEMP,
     UNIQUE_ID_SW_CONTROLLER,
     UNIQUE_ID_SW_DISPLAY,
     UNIQUE_ID_TARGET_PRESSURE,
@@ -80,6 +82,53 @@ async def async_setup_entry(
     async_add_entities(
         GaggiMateSensor(coordinator, entry, description) for description in SENSORS
     )
+
+    async_setup_steam_entities(
+        hass,
+        entry,
+        coordinator,
+        async_add_entities,
+        "sensor",
+        [GaggiMateSensor(coordinator, entry, description) for description in STEAM_SENSORS],
+    )
+
+
+def async_setup_steam_entities(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    coordinator: GaggiMateCoordinator,
+    async_add_entities: AddEntitiesCallback,
+    platform: str,
+    entities: list[Entity],
+) -> None:
+    """Add steam boiler entities only on boards that support them.
+
+    Support is only known once the first status frame has arrived, so this
+    waits for data. Boards that report steamControlsAvailable get the
+    entities; on other boards any entities left over from an earlier run are
+    removed from the registry so they don't linger as "unavailable".
+    """
+    state = {"added": False, "cleaned": False}
+
+    @callback
+    def _check() -> None:
+        data = coordinator.data
+        if not data or state["added"]:
+            return
+        if data.get("steamControlsAvailable"):
+            state["added"] = True
+            async_add_entities(entities)
+            return
+        if not state["cleaned"]:
+            state["cleaned"] = True
+            registry = er.async_get(hass)
+            for entity in entities:
+                entity_id = registry.async_get_entity_id(platform, DOMAIN, entity.unique_id)
+                if entity_id:
+                    registry.async_remove(entity_id)
+
+    entry.async_on_unload(coordinator.async_add_listener(_check))
+    _check()
 
 
 class GaggiMateEntity(CoordinatorEntity[GaggiMateCoordinator]):
@@ -577,5 +626,22 @@ SENSORS: tuple[GaggiMateSensorEntityDescription, ...] = (
         extra_attrs_fn=lambda data, _: _get_warning_attrs(
             data, "scaleBattery"
         ),
+    ),
+)
+
+
+# Created only on dual-boiler boards, see async_setup_steam_entities
+STEAM_SENSORS: tuple[GaggiMateSensorEntityDescription, ...] = (
+    GaggiMateSensorEntityDescription(
+        key=UNIQUE_ID_STEAM_TEMP,
+        name="Steam Temperature",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        icon="mdi:thermometer",
+        suggested_display_precision=1,
+        value_fn=lambda data, _: _quantize(data.get("cst"), 1),
+        # Only dual-boiler boards report a separate steam boiler
+        available_fn=lambda _, coordinator: coordinator.steam_controls_available,
     ),
 )

@@ -30,6 +30,7 @@ MSG_TYPE_OTA_SETTINGS = "req:ota-settings"
 MSG_TYPE_HISTORY_LIST = "req:history:list"
 MSG_TYPE_HISTORY_DELETE = "req:history:delete"
 MSG_TYPE_HISTORY_NOTES_GET = "req:history:notes:get"
+MSG_TYPE_STEAM_TOGGLE = "req:steam:toggle"
 
 # Machine modes
 class MachineMode(IntEnum):
@@ -92,6 +93,8 @@ UNIQUE_ID_WARNING_SWITCH = "warning_switch"
 UNIQUE_ID_WARNING_FLUSH = "warning_flush"
 UNIQUE_ID_WARNING_SCALE_CONNECTED = "warning_scale_connected"
 UNIQUE_ID_WARNING_SCALE_BATTERY = "warning_scale_battery"
+UNIQUE_ID_STEAM_TEMP = "steam_temperature"
+UNIQUE_ID_STEAM_BOILER = "steam_boiler"
 
 # Services
 ATTR_MAX_SHOTS = "max_shots"

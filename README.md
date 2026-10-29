@@ -36,6 +36,7 @@ Control and monitor your GaggiMate-equipped espresso machine directly from Home 
 |--------|-------------|--------------|
 | Current Temperature | Live temperature reading from the machine | Temperature |
 | Target Temperature | Desired temperature target | Temperature |
+| Steam Temperature | Live steam boiler temperature (dual-boiler boards only) | Temperature |
 | Current Pressure | Live pressure reading from the machine | Pressure |
 | Target Pressure | Desired pressure target | Pressure |
 | Pump Flow | Current pump flow rate | - |
@@ -58,6 +59,7 @@ Control and monitor your GaggiMate-equipped espresso machine directly from Home 
 | Entity | Type | Description |
 |--------|------|-------------|
 | Machine Active | Switch | Turn the machine on/off |
+| Steam Boiler | Switch | Turn the steam boiler heater on/off (dual-boiler boards only) |
 | Mode | Select | Choose machine operating mode |
 | Profile | Select | Choose brewing profile |
 | Target Temperature Setpoint | Number | Set desired temperature (0–160 °C) |
