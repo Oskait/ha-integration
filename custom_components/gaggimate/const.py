@@ -94,6 +94,7 @@ UNIQUE_ID_WARNING_FLUSH = "warning_flush"
 UNIQUE_ID_WARNING_SCALE_CONNECTED = "warning_scale_connected"
 UNIQUE_ID_WARNING_SCALE_BATTERY = "warning_scale_battery"
 UNIQUE_ID_STEAM_TEMP = "steam_temperature"
+UNIQUE_ID_STEAM_TARGET_TEMP = "steam_target_temperature"
 UNIQUE_ID_STEAM_BOILER = "steam_boiler"
 
 # Services

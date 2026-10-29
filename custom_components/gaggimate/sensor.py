@@ -38,6 +38,7 @@ from .const import (
     UNIQUE_ID_PROCESS_PHASE,
     UNIQUE_ID_STATUS,
     UNIQUE_ID_STEAM_TEMP,
+    UNIQUE_ID_STEAM_TARGET_TEMP,
     UNIQUE_ID_SW_CONTROLLER,
     UNIQUE_ID_SW_DISPLAY,
     UNIQUE_ID_TARGET_PRESSURE,
@@ -642,6 +643,17 @@ STEAM_SENSORS: tuple[GaggiMateSensorEntityDescription, ...] = (
         suggested_display_precision=1,
         value_fn=lambda data, _: _quantize(data.get("cst"), 1),
         # Only dual-boiler boards report a separate steam boiler
+        available_fn=lambda _, coordinator: coordinator.steam_controls_available,
+    ),
+    GaggiMateSensorEntityDescription(
+        key=UNIQUE_ID_STEAM_TARGET_TEMP,
+        name="Target Steam Temperature",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        icon="mdi:thermometer-auto",
+        suggested_display_precision=1,
+        value_fn=lambda data, _: _quantize(data.get("tst"), 1),
         available_fn=lambda _, coordinator: coordinator.steam_controls_available,
     ),
 )
